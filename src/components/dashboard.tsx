@@ -10,6 +10,7 @@ const precise = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
 const money = (value: number | null | undefined) => value == null ? "—" : `$${compact.format(value)}`;
 const short = (address: string) => `${address.slice(0, 5)}…${address.slice(-5)}`;
 const signed = (value: number) => `${value > 0 ? "+" : ""}${compact.format(value)}`;
+const unlockDate = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(value));
 type HolderFilter = "all" | "pool" | "controlled" | "user";
 
 function Sparkline({ history }: { history: SnapshotSummary[] }) {
@@ -34,7 +35,7 @@ function HolderRow({ holder }: { holder: Holder }) {
   const deltaClass = holder.delta > 0 ? "positive" : holder.delta < 0 ? "negative" : "muted";
   return <tr>
     <td className="rank">{String(holder.rank).padStart(2, "0")}</td>
-    <td><div className="wallet-cell"><div className="wallet-address-line"><a className="address" href={`https://solscan.io/account/${holder.owner}`} target="_blank" rel="noreferrer">{short(holder.owner)} <span>↗</span></a>{holder.protocol && <span className={`protocol-badge ${holder.category}`}>{holder.protocol}</span>}{holder.verified && <span className="verified-source" tabIndex={0}>✓<span className="source-tooltip"><b>VERIFIED SOURCE</b>{holder.sourceName}<a href={holder.sourceUrl || "#"} target="_blank" rel="noreferrer">Open evidence ↗</a></span></span>}</div><span className={`wallet-label ${holder.category}`}>{holder.label}</span></div></td>
+    <td><div className="wallet-cell"><div className="wallet-address-line"><a className="address" href={`https://solscan.io/account/${holder.owner}`} target="_blank" rel="noreferrer">{short(holder.owner)} <span>↗</span></a>{holder.protocol && <span className={`protocol-badge ${holder.category}`}>{holder.protocol}</span>}{holder.verified && <span className="verified-source" tabIndex={0}>✓<span className="source-tooltip"><b>VERIFIED SOURCE</b><strong>{holder.sourceName}</strong>{holder.allocationNote && <p>{holder.allocationNote}</p>}{holder.unlockAt && <em>UNLOCKS {unlockDate(holder.unlockAt)}</em>}<a href={holder.sourceUrl || "#"} target="_blank" rel="noreferrer">Open evidence ↗</a></span></span>}</div><span className={`wallet-label ${holder.category}`}>{holder.label}</span>{holder.unlockAt && <span className="unlock-date">UNLOCKS {unlockDate(holder.unlockAt)}</span>}</div></td>
     <td className="number strong">{precise.format(holder.balance)}</td>
     <td className="number"><div className="share"><span style={{ width: `${Math.min(holder.sharePct * 2, 70)}px` }} />{holder.sharePct.toFixed(2)}%</div></td>
     <td className={`number ${deltaClass}`}>{signed(holder.delta)}</td>

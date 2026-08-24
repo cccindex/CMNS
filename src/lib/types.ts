@@ -14,6 +14,8 @@ export type Holder = {
   verified: boolean;
   sourceName: string | null;
   sourceUrl: string | null;
+  allocationNote: string | null;
+  unlockAt: string | null;
 };
 
 export type MarketData = {
