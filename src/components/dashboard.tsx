@@ -107,10 +107,12 @@ export default function Dashboard() {
   const lockedBalance = lockedHolders.reduce((sum, holder) => sum + holder.balance, 0);
   const treasuryLocked = lockedHolders.filter((holder) => holder.category === "treasury").reduce((sum, holder) => sum + holder.balance, 0);
   const vestingLocked = lockedBalance - treasuryLocked;
+  const poolBalance = latest.holders.filter((holder) => holder.category === "pool").reduce((sum, holder) => sum + holder.balance, 0);
   const protocolBalance = latest.holders.filter((holder) => holder.category === "protocol").reduce((sum, holder) => sum + holder.balance, 0);
+  const userBalance = latest.holders.filter((holder) => holder.category === "user").reduce((sum, holder) => sum + holder.balance, 0);
   const circulatingEstimate = Math.max(0, latest.trackedSupply - lockedBalance);
-  const circulatingPct = latest.trackedSupply ? circulatingEstimate / latest.trackedSupply * 100 : 0;
   const lockedPct = latest.trackedSupply ? lockedBalance / latest.trackedSupply * 100 : 0;
+  const circulatingShare = (value: number) => circulatingEstimate ? value / circulatingEstimate * 100 : 0;
   return <main>
     <header>
       <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>HOLDER INTELLIGENCE</small></a>
@@ -127,13 +129,12 @@ export default function Dashboard() {
     </section>
 
     <section className="supply-overview panel">
-      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>Estimate equals tracked supply minus confirmed lock contracts. It includes {compact.format(protocolBalance)} CMNS held by the verified token-creator operations wallet.</p></div>
+      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>{compact.format(userBalance)} sits in ordinary or currently unclassified wallets, {compact.format(poolBalance)} provides liquidity, and {compact.format(protocolBalance)} remains in the verified token-creator operations wallet.</p></div>
       <div className="supply-cards">
-        <article><span>EST. CIRCULATING</span><b className="acid">{compact.format(circulatingEstimate)}</b><small>{circulatingPct.toFixed(1)}% of supply</small></article>
-        <article><span>CONFIRMED LOCKED</span><b>{compact.format(lockedBalance)}</b><small>{lockedPct.toFixed(1)}% of supply</small></article>
-        <article><span>TREASURY LOCK</span><b>{compact.format(treasuryLocked)}</b><small>Unlocks 28 Sep 2026</small></article>
-        <article><span>TEAM + COMMUNITY</span><b>{compact.format(vestingLocked)}</b><small>80M Sep 2026 · 250M Aug 2027</small></article>
-        <article><span>PROTOCOL INVENTORY</span><b>{compact.format(protocolBalance)}</b><small>Token creator operations wallet</small></article>
+        <article><span>USER / UNCLASSIFIED</span><b className="acid">{compact.format(userBalance)}</b><small>{circulatingShare(userBalance).toFixed(1)}% of circulating</small></article>
+        <article><span>LIQUIDITY POOLS</span><b>{compact.format(poolBalance)}</b><small>{circulatingShare(poolBalance).toFixed(1)}% of circulating</small></article>
+        <article><span>PROTOCOL INVENTORY</span><b>{compact.format(protocolBalance)}</b><small>{circulatingShare(protocolBalance).toFixed(1)}% of circulating</small></article>
+        <article><span>CONFIRMED LOCKED</span><b>{compact.format(lockedBalance)}</b><small>{lockedPct.toFixed(1)}% total · {compact.format(treasuryLocked)} treasury + {compact.format(vestingLocked)} vesting</small></article>
       </div>
     </section>
 

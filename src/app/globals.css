@@ -10,6 +10,6 @@
 @media(max-width:1050px){.supply-overview{grid-template-columns:1fr}.supply-intro{border-right:0;border-bottom:1px solid var(--line)}.supply-cards article{padding:20px}}
 @media(max-width:700px){.supply-cards{grid-template-columns:1fr 1fr}.supply-cards article{border-bottom:1px solid var(--line)}.supply-cards article:nth-child(2){border-right:0}.pagination{align-items:flex-start;flex-direction:column;gap:14px}.pagination>div{width:100%;justify-content:space-between}.pagination button:first-child,.pagination button:last-child{display:none}}
 
-.wallet-label.protocol{color:#ff8ee7}.protocol-badge.protocol{color:#ff8ee7;border-color:#603857}.supply-cards{grid-template-columns:repeat(5,1fr)}
+.wallet-label.protocol{color:#ff8ee7}.protocol-badge.protocol{color:#ff8ee7;border-color:#603857}.supply-cards{grid-template-columns:repeat(4,1fr)}
 @media(max-width:1050px){.supply-cards{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.supply-cards{grid-template-columns:1fr 1fr}}
