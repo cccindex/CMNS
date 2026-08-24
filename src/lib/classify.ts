@@ -17,6 +17,16 @@ const VERIFIED_WALLETS: Record<string, Classification> = {
     allocationNote: "Protocol operations signer. Creates token mints and Jupiter Lock vesting escrows, and claims Meteora DBC/DAMM fees across launches. Not an ordinary user wallet.",
     unlockAt: null,
   },
+  GaaNnrUVww5WidSxMDALgCcQFpceiPfmpsJiuePFt7K6: {
+    category: "protocol",
+    label: "Team Wallet · Future Airdrops",
+    protocol: "CMNS Team",
+    verified: false,
+    sourceName: "Project team identification",
+    sourceUrl: null,
+    allocationNote: "Team-controlled inventory reserved for future community airdrops.",
+    unlockAt: null,
+  },
   D212j6ejH145U5TcEz9BXeENR5eip9itNcUPJbj1B5jd: {
     category: "pool",
     label: "Automated Capital Formation Pool",

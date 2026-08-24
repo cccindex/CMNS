@@ -129,11 +129,11 @@ export default function Dashboard() {
     </section>
 
     <section className="supply-overview panel">
-      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>{compact.format(userBalance)} sits in ordinary or currently unclassified wallets, {compact.format(poolBalance)} provides liquidity, and {compact.format(protocolBalance)} remains in the verified token-creator operations wallet.</p></div>
+      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>{compact.format(userBalance)} sits in ordinary or currently unclassified wallets, {compact.format(poolBalance)} provides liquidity, and {compact.format(protocolBalance)} is held in identified protocol or team-controlled wallets.</p></div>
       <div className="supply-cards">
         <article><span>USER / UNCLASSIFIED</span><b className="acid">{compact.format(userBalance)}</b><small>{circulatingShare(userBalance).toFixed(1)}% of circulating</small></article>
         <article><span>LIQUIDITY POOLS</span><b>{compact.format(poolBalance)}</b><small>{circulatingShare(poolBalance).toFixed(1)}% of circulating</small></article>
-        <article><span>PROTOCOL INVENTORY</span><b>{compact.format(protocolBalance)}</b><small>{circulatingShare(protocolBalance).toFixed(1)}% of circulating</small></article>
+        <article><span>PROTOCOL / TEAM</span><b>{compact.format(protocolBalance)}</b><small>{circulatingShare(protocolBalance).toFixed(1)}% of circulating</small></article>
         <article><span>CONFIRMED LOCKED</span><b>{compact.format(lockedBalance)}</b><small>{lockedPct.toFixed(1)}% total · {compact.format(treasuryLocked)} treasury + {compact.format(vestingLocked)} vesting</small></article>
       </div>
     </section>
