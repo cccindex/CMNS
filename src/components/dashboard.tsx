@@ -12,6 +12,7 @@ const short = (address: string) => `${address.slice(0, 5)}…${address.slice(-5)
 const signed = (value: number) => `${value > 0 ? "+" : ""}${compact.format(value)}`;
 const unlockDate = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(value));
 type HolderFilter = "all" | "pool" | "controlled" | "user";
+const PAGE_SIZE = 100;
 
 function Sparkline({ history }: { history: SnapshotSummary[] }) {
   const values = history.slice(-72).map((point) => point.holderCount);
@@ -31,12 +32,13 @@ function Metric({ label, value, note, tone }: { label: string; value: string; no
   return <article className="metric"><div className="metric-label">{label}</div><div className={`metric-value ${tone || ""}`}>{value}</div><div className="metric-note">{note}</div></article>;
 }
 
-function HolderRow({ holder }: { holder: Holder }) {
+function HolderRow({ holder, priceUsd }: { holder: Holder; priceUsd: number | null }) {
   const deltaClass = holder.delta > 0 ? "positive" : holder.delta < 0 ? "negative" : "muted";
   return <tr>
     <td className="rank">{String(holder.rank).padStart(2, "0")}</td>
     <td><div className="wallet-cell"><div className="wallet-address-line"><a className="address" href={`https://solscan.io/account/${holder.owner}`} target="_blank" rel="noreferrer">{short(holder.owner)} <span>↗</span></a>{holder.protocol && <span className={`protocol-badge ${holder.category}`}>{holder.protocol}</span>}{holder.verified && <span className="verified-source" tabIndex={0}>✓<span className="source-tooltip"><b>VERIFIED SOURCE</b><strong>{holder.sourceName}</strong>{holder.allocationNote && <p>{holder.allocationNote}</p>}{holder.unlockAt && <em>UNLOCKS {unlockDate(holder.unlockAt)}</em>}<a href={holder.sourceUrl || "#"} target="_blank" rel="noreferrer">Open evidence ↗</a></span></span>}</div><span className={`wallet-label ${holder.category}`}>{holder.label}</span>{holder.unlockAt && <span className="unlock-date">UNLOCKS {unlockDate(holder.unlockAt)}</span>}</div></td>
     <td className="number strong">{precise.format(holder.balance)}</td>
+    <td className="number usd-value">{priceUsd == null ? "—" : money(holder.balance * priceUsd)}</td>
     <td className="number"><div className="share"><span style={{ width: `${Math.min(holder.sharePct * 2, 70)}px` }} />{holder.sharePct.toFixed(2)}%</div></td>
     <td className={`number ${deltaClass}`}>{signed(holder.delta)}</td>
     <td className="number">{holder.status === "new" ? <span className="new-pill">NEW</span> : holder.rankChange ? `${holder.rankChange > 0 ? "↑" : "↓"} ${Math.abs(holder.rankChange)}` : "—"}</td>
@@ -49,6 +51,7 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
   const [filter, setFilter] = useState<HolderFilter>("all");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     let active = true;
@@ -76,6 +79,13 @@ export default function Dashboard() {
     });
   }, [latest, query, filter]);
 
+  useEffect(() => { setPage(1); }, [filter, query]);
+
+  const totalPages = Math.max(1, Math.ceil(holders.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pagedHolders = holders.slice(pageStart, pageStart + PAGE_SIZE);
+
   const copyMint = async () => {
     await navigator.clipboard.writeText(MINT);
     setCopied(true);
@@ -93,6 +103,13 @@ export default function Dashboard() {
     return counts;
   }, {} as Record<Holder["category"], number>);
   const concentration = latest.concentration;
+  const lockedHolders = latest.holders.filter((holder) => holder.category === "treasury" || holder.category === "vesting");
+  const lockedBalance = lockedHolders.reduce((sum, holder) => sum + holder.balance, 0);
+  const treasuryLocked = lockedHolders.filter((holder) => holder.category === "treasury").reduce((sum, holder) => sum + holder.balance, 0);
+  const vestingLocked = lockedBalance - treasuryLocked;
+  const circulatingEstimate = Math.max(0, latest.trackedSupply - lockedBalance);
+  const circulatingPct = latest.trackedSupply ? circulatingEstimate / latest.trackedSupply * 100 : 0;
+  const lockedPct = latest.trackedSupply ? lockedBalance / latest.trackedSupply * 100 : 0;
   return <main>
     <header>
       <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>HOLDER INTELLIGENCE</small></a>
@@ -106,6 +123,16 @@ export default function Dashboard() {
     <section className="hero">
       <div><div className="eyebrow">COMMONS BY VIRTUALS <span>/</span> SOLANA</div><h1>Who owns<br/><em>the commons?</em></h1><p>Every wallet. Every movement. One fresh snapshot every ten minutes.</p></div>
       <button className="mint" onClick={copyMint}><span>MINT ADDRESS</span><b>{short(MINT)}</b><i>{copied ? "COPIED" : "COPY"}</i></button>
+    </section>
+
+    <section className="supply-overview panel">
+      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>Estimate equals tracked supply minus balances held in confirmed Virtuals lock contracts. Pools and ACF inventory remain inside the circulating estimate.</p></div>
+      <div className="supply-cards">
+        <article><span>EST. CIRCULATING</span><b className="acid">{compact.format(circulatingEstimate)}</b><small>{circulatingPct.toFixed(1)}% of supply</small></article>
+        <article><span>CONFIRMED LOCKED</span><b>{compact.format(lockedBalance)}</b><small>{lockedPct.toFixed(1)}% of supply</small></article>
+        <article><span>TREASURY LOCK</span><b>{compact.format(treasuryLocked)}</b><small>Unlocks 28 Sep 2026</small></article>
+        <article><span>TEAM + COMMUNITY</span><b>{compact.format(vestingLocked)}</b><small>80M Sep 2026 · 250M Aug 2027</small></article>
+      </div>
     </section>
 
     <section className="metrics">
@@ -133,8 +160,9 @@ export default function Dashboard() {
         <button className={filter === "controlled" ? "active" : ""} onClick={() => setFilter("controlled")}>TREASURY + VESTING <b>{(categoryCounts.treasury || 0) + (categoryCounts.vesting || 0)}</b></button>
         <button className={filter === "user" ? "active" : ""} onClick={() => setFilter("user")}>USERS <b>{categoryCounts.user || 0}</b></button>
       </div>
-      <div className="table-scroll"><table><thead><tr><th>RANK</th><th>WALLET</th><th className="number">BALANCE</th><th className="number">SHARE</th><th className="number">10M CHANGE</th><th className="number">RANK MOVE</th></tr></thead><tbody>{holders.map((holder) => <HolderRow key={holder.owner} holder={holder} />)}</tbody></table></div>
+      <div className="table-scroll"><table><thead><tr><th>RANK</th><th>WALLET</th><th className="number">BALANCE</th><th className="number">USD VALUE</th><th className="number">SHARE</th><th className="number">10M CHANGE</th><th className="number">RANK MOVE</th></tr></thead><tbody>{pagedHolders.map((holder) => <HolderRow key={holder.owner} holder={holder} priceUsd={latest.market.priceUsd} />)}</tbody></table></div>
       {!holders.length && <div className="no-results">No wallet matched this filter.</div>}
+      {!!holders.length && <div className="pagination"><span>SHOWING {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, holders.length)} OF {holders.length}</span><div><button onClick={() => setPage(1)} disabled={currentPage === 1}>FIRST</button><button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1}>← PREV</button><b>PAGE {currentPage} / {totalPages}</b><button onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={currentPage === totalPages}>NEXT →</button><button onClick={() => setPage(totalPages)} disabled={currentPage === totalPages}>LAST</button></div></div>}
     </section>
 
     <footer><span>CMNS HOLDER INTELLIGENCE</span><span>BLOCK {latest.slot.toLocaleString()} · {new Date(latest.capturedAt).toLocaleString()}</span><span>DATA: SOLANA RPC + DEXSCREENER</span></footer>
