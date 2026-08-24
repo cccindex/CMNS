@@ -8,7 +8,7 @@ export type Holder = {
   deltaRaw: string;
   rankChange: number;
   status: "new" | "up" | "down" | "unchanged";
-  category: "pool" | "treasury" | "vesting" | "user";
+  category: "pool" | "protocol" | "treasury" | "vesting" | "user";
   label: string;
   protocol: string | null;
   verified: boolean;

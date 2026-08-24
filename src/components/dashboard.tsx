@@ -11,7 +11,7 @@ const money = (value: number | null | undefined) => value == null ? "—" : `$${
 const short = (address: string) => `${address.slice(0, 5)}…${address.slice(-5)}`;
 const signed = (value: number) => `${value > 0 ? "+" : ""}${compact.format(value)}`;
 const unlockDate = (value: string) => new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(value));
-type HolderFilter = "all" | "pool" | "controlled" | "user";
+type HolderFilter = "all" | "pool" | "protocol" | "controlled" | "user";
 const PAGE_SIZE = 100;
 
 function Sparkline({ history }: { history: SnapshotSummary[] }) {
@@ -107,6 +107,7 @@ export default function Dashboard() {
   const lockedBalance = lockedHolders.reduce((sum, holder) => sum + holder.balance, 0);
   const treasuryLocked = lockedHolders.filter((holder) => holder.category === "treasury").reduce((sum, holder) => sum + holder.balance, 0);
   const vestingLocked = lockedBalance - treasuryLocked;
+  const protocolBalance = latest.holders.filter((holder) => holder.category === "protocol").reduce((sum, holder) => sum + holder.balance, 0);
   const circulatingEstimate = Math.max(0, latest.trackedSupply - lockedBalance);
   const circulatingPct = latest.trackedSupply ? circulatingEstimate / latest.trackedSupply * 100 : 0;
   const lockedPct = latest.trackedSupply ? lockedBalance / latest.trackedSupply * 100 : 0;
@@ -126,12 +127,13 @@ export default function Dashboard() {
     </section>
 
     <section className="supply-overview panel">
-      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>Estimate equals tracked supply minus balances held in confirmed Virtuals lock contracts. Pools and ACF inventory remain inside the circulating estimate.</p></div>
+      <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>Estimate equals tracked supply minus confirmed lock contracts. It includes {compact.format(protocolBalance)} CMNS held by the verified token-creator operations wallet.</p></div>
       <div className="supply-cards">
         <article><span>EST. CIRCULATING</span><b className="acid">{compact.format(circulatingEstimate)}</b><small>{circulatingPct.toFixed(1)}% of supply</small></article>
         <article><span>CONFIRMED LOCKED</span><b>{compact.format(lockedBalance)}</b><small>{lockedPct.toFixed(1)}% of supply</small></article>
         <article><span>TREASURY LOCK</span><b>{compact.format(treasuryLocked)}</b><small>Unlocks 28 Sep 2026</small></article>
         <article><span>TEAM + COMMUNITY</span><b>{compact.format(vestingLocked)}</b><small>80M Sep 2026 · 250M Aug 2027</small></article>
+        <article><span>PROTOCOL INVENTORY</span><b>{compact.format(protocolBalance)}</b><small>Token creator operations wallet</small></article>
       </div>
     </section>
 
@@ -153,10 +155,11 @@ export default function Dashboard() {
     </section>
 
     <section className="panel table-panel">
-      <div className="table-title"><div><span className="kicker">LIVE DISTRIBUTION</span><h2>{filter === "all" ? "All holders" : filter === "pool" ? "Liquidity pools" : filter === "controlled" ? "Treasury & vesting" : "User wallets"}</h2></div><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search wallet or label" /></label></div>
+      <div className="table-title"><div><span className="kicker">LIVE DISTRIBUTION</span><h2>{filter === "all" ? "All holders" : filter === "pool" ? "Liquidity pools" : filter === "protocol" ? "Protocol wallets" : filter === "controlled" ? "Treasury & vesting" : "User wallets"}</h2></div><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search wallet or label" /></label></div>
       <div className="holder-filters">
         <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>ALL <b>{latest.holderCount}</b></button>
         <button className={filter === "pool" ? "active" : ""} onClick={() => setFilter("pool")}>POOLS <b>{categoryCounts.pool || 0}</b></button>
+        <button className={filter === "protocol" ? "active" : ""} onClick={() => setFilter("protocol")}>PROTOCOL <b>{categoryCounts.protocol || 0}</b></button>
         <button className={filter === "controlled" ? "active" : ""} onClick={() => setFilter("controlled")}>TREASURY + VESTING <b>{(categoryCounts.treasury || 0) + (categoryCounts.vesting || 0)}</b></button>
         <button className={filter === "user" ? "active" : ""} onClick={() => setFilter("user")}>USERS <b>{categoryCounts.user || 0}</b></button>
       </div>

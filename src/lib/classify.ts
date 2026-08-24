@@ -4,8 +4,19 @@ type Classification = Pick<Holder, "category" | "label" | "protocol" | "verified
 
 const VIRTUALS_SOURCE = "https://app.virtuals.io/virtuals/136564";
 const METEORA_SOURCE = "https://github.com/MeteoraAg/docs/blob/main/developer-guides/damm-v2/index.mdx";
+const TOKEN_CREATOR_SOURCE = "https://solscan.io/account/AamUJY5hvSPCcpw2e6mzCuMsxrdQKVnN8iFeYKSZNFcf";
 
 const VERIFIED_WALLETS: Record<string, Classification> = {
+  AamUJY5hvSPCcpw2e6mzCuMsxrdQKVnN8iFeYKSZNFcf: {
+    category: "protocol",
+    label: "Token Creator · Launch Operations",
+    protocol: "Virtuals",
+    verified: true,
+    sourceName: "Solscan Token Creator registry",
+    sourceUrl: TOKEN_CREATOR_SOURCE,
+    allocationNote: "Protocol operations signer. Creates token mints and Jupiter Lock vesting escrows, and claims Meteora DBC/DAMM fees across launches. Not an ordinary user wallet.",
+    unlockAt: null,
+  },
   D212j6ejH145U5TcEz9BXeENR5eip9itNcUPJbj1B5jd: {
     category: "pool",
     label: "Automated Capital Formation Pool",
