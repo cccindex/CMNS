@@ -8,6 +8,12 @@ export type Holder = {
   deltaRaw: string;
   rankChange: number;
   status: "new" | "up" | "down" | "unchanged";
+  category: "pool" | "treasury" | "vesting" | "user";
+  label: string;
+  protocol: string | null;
+  verified: boolean;
+  sourceName: string | null;
+  sourceUrl: string | null;
 };
 
 export type MarketData = {
@@ -41,6 +47,15 @@ export type Snapshot = SnapshotSummary & {
   tokenAccountCount: number;
   holders: Holder[];
   movers: { increased: number; decreased: number; transferred: number };
+  concentration: {
+    poolBalance: number;
+    poolSharePct: number;
+    nonPoolSupply: number;
+    nonPoolHolderCount: number;
+    nonPoolTop1Pct: number;
+    nonPoolTop5Pct: number;
+    nonPoolTop10Pct: number;
+  };
 };
 
 export type DashboardPayload = {

@@ -10,6 +10,7 @@ const precise = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
 const money = (value: number | null | undefined) => value == null ? "—" : `$${compact.format(value)}`;
 const short = (address: string) => `${address.slice(0, 5)}…${address.slice(-5)}`;
 const signed = (value: number) => `${value > 0 ? "+" : ""}${compact.format(value)}`;
+type HolderFilter = "all" | "pool" | "controlled" | "user";
 
 function Sparkline({ history }: { history: SnapshotSummary[] }) {
   const values = history.slice(-72).map((point) => point.holderCount);
@@ -33,7 +34,7 @@ function HolderRow({ holder }: { holder: Holder }) {
   const deltaClass = holder.delta > 0 ? "positive" : holder.delta < 0 ? "negative" : "muted";
   return <tr>
     <td className="rank">{String(holder.rank).padStart(2, "0")}</td>
-    <td><a className="address" href={`https://solscan.io/account/${holder.owner}`} target="_blank" rel="noreferrer">{short(holder.owner)} <span>↗</span></a></td>
+    <td><div className="wallet-cell"><div className="wallet-address-line"><a className="address" href={`https://solscan.io/account/${holder.owner}`} target="_blank" rel="noreferrer">{short(holder.owner)} <span>↗</span></a>{holder.protocol && <span className={`protocol-badge ${holder.category}`}>{holder.protocol}</span>}{holder.verified && <span className="verified-source" tabIndex={0}>✓<span className="source-tooltip"><b>VERIFIED SOURCE</b>{holder.sourceName}<a href={holder.sourceUrl || "#"} target="_blank" rel="noreferrer">Open evidence ↗</a></span></span>}</div><span className={`wallet-label ${holder.category}`}>{holder.label}</span></div></td>
     <td className="number strong">{precise.format(holder.balance)}</td>
     <td className="number"><div className="share"><span style={{ width: `${Math.min(holder.sharePct * 2, 70)}px` }} />{holder.sharePct.toFixed(2)}%</div></td>
     <td className={`number ${deltaClass}`}>{signed(holder.delta)}</td>
@@ -46,6 +47,7 @@ export default function Dashboard() {
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
+  const [filter, setFilter] = useState<HolderFilter>("all");
 
   useEffect(() => {
     let active = true;
@@ -66,8 +68,12 @@ export default function Dashboard() {
   const holders = useMemo(() => {
     if (!latest) return [];
     const needle = query.trim().toLowerCase();
-    return needle ? latest.holders.filter((holder) => holder.owner.toLowerCase().includes(needle)) : latest.holders;
-  }, [latest, query]);
+    return latest.holders.filter((holder) => {
+      const matchesFilter = filter === "all" || (filter === "controlled" ? holder.category === "treasury" || holder.category === "vesting" : holder.category === filter);
+      const matchesQuery = !needle || `${holder.owner} ${holder.label} ${holder.protocol || ""}`.toLowerCase().includes(needle);
+      return matchesFilter && matchesQuery;
+    });
+  }, [latest, query, filter]);
 
   const copyMint = async () => {
     await navigator.clipboard.writeText(MINT);
@@ -81,6 +87,11 @@ export default function Dashboard() {
 
   const ageMinutes = Math.max(0, Math.floor((Date.now() - new Date(latest.capturedAt).getTime()) / 60_000));
   const history = data.history || [];
+  const categoryCounts = latest.holders.reduce((counts, holder) => {
+    counts[holder.category] = (counts[holder.category] || 0) + 1;
+    return counts;
+  }, {} as Record<Holder["category"], number>);
+  const concentration = latest.concentration;
   return <main>
     <header>
       <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>HOLDER INTELLIGENCE</small></a>
@@ -100,8 +111,13 @@ export default function Dashboard() {
       <Metric label="ONCHAIN HOLDERS" value={precise.format(latest.holderCount)} note={`${latest.entrants} entered · ${latest.exits} exited`} tone="acid" />
       <Metric label="TOKEN PRICE" value={latest.market.priceUsd == null ? "—" : `$${latest.market.priceUsd.toFixed(6)}`} note={`${latest.market.priceChange24h != null && latest.market.priceChange24h >= 0 ? "+" : ""}${latest.market.priceChange24h?.toFixed(2) ?? "—"}% over 24h`} tone={latest.market.priceChange24h && latest.market.priceChange24h < 0 ? "red" : ""} />
       <Metric label="MARKET CAP" value={money(latest.market.marketCap)} note={`${money(latest.market.volume24h)} volume / 24h`} />
-      <Metric label="TOP 10 CONTROL" value={`${latest.top10Pct.toFixed(2)}%`} note={`Top 1 controls ${latest.top1Pct.toFixed(2)}%`} />
+      <Metric label="TOP 10 / EX-POOLS" value={concentration ? `${concentration.nonPoolTop10Pct.toFixed(2)}%` : "—"} note={concentration ? `${compact.format(concentration.poolBalance)} CMNS in verified pools` : "Calculating verified pools"} />
     </section>
+
+    {concentration && <section className="concentration-strip">
+      <div><span>CONCENTRATION WITHOUT LIQUIDITY POOLS</span><p>Pool balances are removed from both the ranking and circulating denominator.</p></div>
+      <dl><div><dt>TOP 1</dt><dd>{concentration.nonPoolTop1Pct.toFixed(2)}%</dd></div><div><dt>TOP 5</dt><dd>{concentration.nonPoolTop5Pct.toFixed(2)}%</dd></div><div><dt>TOP 10</dt><dd>{concentration.nonPoolTop10Pct.toFixed(2)}%</dd></div><div><dt>VERIFIED POOLS</dt><dd>{concentration.poolSharePct.toFixed(2)}%</dd></div></dl>
+    </section>}
 
     <section className="insight-grid">
       <article className="panel trend-panel"><div className="panel-head"><div><span className="kicker">HOLDER TREND</span><h2>{latest.holderCount} wallets</h2></div><span className="period">LAST 12H</span></div><Sparkline history={history} /><div className="trend-foot"><span><i className="dot acid-dot"/> Current holders</span><span>{history.length} snapshots saved</span></div></article>
@@ -109,9 +125,15 @@ export default function Dashboard() {
     </section>
 
     <section className="panel table-panel">
-      <div className="table-title"><div><span className="kicker">LIVE DISTRIBUTION</span><h2>All holders</h2></div><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search wallet address" /></label></div>
+      <div className="table-title"><div><span className="kicker">LIVE DISTRIBUTION</span><h2>{filter === "all" ? "All holders" : filter === "pool" ? "Liquidity pools" : filter === "controlled" ? "Treasury & vesting" : "User wallets"}</h2></div><label className="search"><span>⌕</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search wallet or label" /></label></div>
+      <div className="holder-filters">
+        <button className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>ALL <b>{latest.holderCount}</b></button>
+        <button className={filter === "pool" ? "active" : ""} onClick={() => setFilter("pool")}>POOLS <b>{categoryCounts.pool || 0}</b></button>
+        <button className={filter === "controlled" ? "active" : ""} onClick={() => setFilter("controlled")}>TREASURY + VESTING <b>{(categoryCounts.treasury || 0) + (categoryCounts.vesting || 0)}</b></button>
+        <button className={filter === "user" ? "active" : ""} onClick={() => setFilter("user")}>USERS <b>{categoryCounts.user || 0}</b></button>
+      </div>
       <div className="table-scroll"><table><thead><tr><th>RANK</th><th>WALLET</th><th className="number">BALANCE</th><th className="number">SHARE</th><th className="number">10M CHANGE</th><th className="number">RANK MOVE</th></tr></thead><tbody>{holders.map((holder) => <HolderRow key={holder.owner} holder={holder} />)}</tbody></table></div>
-      {!holders.length && <div className="no-results">No wallet matched that address.</div>}
+      {!holders.length && <div className="no-results">No wallet matched this filter.</div>}
     </section>
 
     <footer><span>CMNS HOLDER INTELLIGENCE</span><span>BLOCK {latest.slot.toLocaleString()} · {new Date(latest.capturedAt).toLocaleString()}</span><span>DATA: SOLANA RPC + DEXSCREENER</span></footer>

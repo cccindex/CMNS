@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchHolders, fetchMarket, MINT } from "@/lib/solana";
 import { readCurrent, saveSnapshot } from "@/lib/storage";
 import type { Holder, Snapshot } from "@/lib/types";
+import { classifyWallet } from "@/lib/classify";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
         deltaRaw: deltaRaw.toString(),
         rankChange: old ? old.rank - rank : 0,
         status: !previous ? "unchanged" : !old ? "new" : deltaRaw > 0n ? "up" : deltaRaw < 0n ? "down" : "unchanged",
+        ...classifyWallet(owner),
       };
     });
 
@@ -50,6 +52,12 @@ export async function GET(request: NextRequest) {
     }, 0n);
     const totalTop = (count: number) => holders.slice(0, count).reduce((sum, holder) => sum + BigInt(holder.amountRaw), 0n);
     const trackedRaw = holders.reduce((sum, holder) => sum + BigInt(holder.amountRaw), 0n);
+    const poolHolders = holders.filter((holder) => holder.category === "pool");
+    const nonPoolHolders = holders.filter((holder) => holder.category !== "pool");
+    const poolRaw = poolHolders.reduce((sum, holder) => sum + BigInt(holder.amountRaw), 0n);
+    const nonPoolRaw = trackedRaw - poolRaw;
+    const nonPoolTop = (count: number) => nonPoolHolders.slice(0, count).reduce((sum, holder) => sum + BigInt(holder.amountRaw), 0n);
+    const nonPoolPct = (raw: bigint) => pct(raw, nonPoolRaw);
 
     const snapshot: Snapshot = {
       version: 1,
@@ -71,6 +79,15 @@ export async function GET(request: NextRequest) {
       holders,
       market,
       movers: { increased, decreased, transferred: Number(transferredRaw) / divisor },
+      concentration: {
+        poolBalance: Number(poolRaw) / divisor,
+        poolSharePct: pct(poolRaw, trackedRaw),
+        nonPoolSupply: Number(nonPoolRaw) / divisor,
+        nonPoolHolderCount: nonPoolHolders.length,
+        nonPoolTop1Pct: nonPoolPct(nonPoolTop(1)),
+        nonPoolTop5Pct: nonPoolPct(nonPoolTop(5)),
+        nonPoolTop10Pct: nonPoolPct(nonPoolTop(10)),
+      },
     };
     await saveSnapshot(snapshot);
     return NextResponse.json({ ok: true, snapshot });
