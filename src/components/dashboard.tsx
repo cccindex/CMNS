@@ -22,9 +22,9 @@ function Sparkline({ history }: { history: SnapshotSummary[] }) {
   const range = max - min || 1;
   const points = values.map((value, index) => `${(index / (values.length - 1)) * 100},${42 - ((value - min) / range) * 34}`).join(" ");
   return <svg className="sparkline" viewBox="0 0 100 48" preserveAspectRatio="none" aria-label="Holder count history">
-    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#c9ff38" stopOpacity=".35"/><stop offset="1" stopColor="#c9ff38" stopOpacity="0"/></linearGradient></defs>
+    <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#f3eedd" stopOpacity=".24"/><stop offset="1" stopColor="#f3eedd" stopOpacity="0"/></linearGradient></defs>
     <polygon points={`0,48 ${points} 100,48`} fill="url(#fill)" />
-    <polyline points={points} fill="none" stroke="#c9ff38" strokeWidth="1.7" vectorEffect="non-scaling-stroke" />
+    <polyline points={points} fill="none" stroke="#f3eedd" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
   </svg>;
 }
 
@@ -112,7 +112,7 @@ export default function Dashboard() {
   const topHolderShare = (count: number) => latest.trackedSupply ? latest.holders.slice(0, count).reduce((sum, holder) => sum + holder.balance, 0) / latest.trackedSupply * 100 : 0;
   return <main>
     <header>
-      <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>HOLDER INTELLIGENCE</small></a>
+      <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>Holder room</small></a>
       <nav>
         <a href="https://app.virtuals.io/virtuals/136564" target="_blank" rel="noreferrer">VIRTUALS ↗</a>
         <a href={`https://dexscreener.com/solana/${PAIR}`} target="_blank" rel="noreferrer">DEX ↗</a>
@@ -121,7 +121,7 @@ export default function Dashboard() {
     </header>
 
     <section className="hero">
-      <div><div className="eyebrow">COMMONS BY VIRTUALS <span>/</span> SOLANA</div><h1>Who owns<br/><em>the commons?</em></h1><p>Every wallet. Every movement. One fresh snapshot every ten minutes.</p></div>
+      <div><div className="eyebrow">COMMONS HOLDER ROOM <span>·</span> SOLANA</div><h1>Who owns<br/><em>the commons?</em></h1><p>Every wallet. Every movement. One fresh snapshot every ten minutes.</p><div className="hero-backing">Backed by <strong>Virtuals Protocol</strong></div></div>
       <button className="mint" onClick={copyMint}><span>MINT ADDRESS</span><b>{short(MINT)}</b><i>{copied ? "COPIED" : "COPY"}</i></button>
     </section>
 
