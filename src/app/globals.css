@@ -155,7 +155,7 @@ nav a:hover { border-color: var(--line-strong); color: var(--cream); background:
   background: linear-gradient(145deg, rgba(24,32,26,.92), rgba(18,25,20,.9));
   box-shadow: var(--raised);
 }
-.supply-overview { display: grid; grid-template-columns: minmax(280px, .85fr) 2fr; overflow: hidden; margin-bottom: 18px; }
+.supply-overview { overflow: hidden; margin-bottom: 18px; }
 .supply-intro { padding: 30px; border-right: 1px solid var(--line); }
 .panel h2, .supply-intro h2 { margin: 10px 0 0; font: 400 31px/1.1 var(--serif); letter-spacing: -.025em; }
 .supply-intro p { max-width: 500px; margin: 16px 0 0; color: var(--cream-soft); font-size: 13px; line-height: 1.65; }
