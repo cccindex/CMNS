@@ -30,7 +30,7 @@ function Sparkline({ history }: { history: SnapshotSummary[] }) {
 }
 
 function Metric({ label, value, note, tone }: { label: string; value: string; note: string; tone?: string }) {
-  return <article className="metric"><div className="metric-label">{label}</div><div className={`metric-value ${tone || ""}`}>{value}</div><div className="metric-note">{note}</div></article>;
+  return <article className="metric"><div className="metric-label">{label}</div><div className="metric-line"><div className={`metric-value ${tone || ""}`}>{value}</div><div className="metric-note">{note}</div></div></article>;
 }
 
 function HolderRow({ holder, priceUsd }: { holder: Holder; priceUsd: number | null }) {
@@ -130,9 +130,9 @@ export default function Dashboard() {
     <section className="supply-overview panel">
       <div className="supply-intro"><span className="kicker">ESTIMATED SUPPLY STATE</span><h2>{compact.format(circulatingEstimate)} CMNS circulating</h2><p>{compact.format(userBalance)} sits in ordinary or currently unclassified wallets, {compact.format(poolBalance)} provides liquidity, and {compact.format(protocolBalance)} is held in identified protocol or team-controlled wallets.</p></div>
       <div className="supply-cards">
-        <article><span>USER / UNCLASSIFIED</span><b className="acid">{compact.format(userBalance)}</b><small>{circulatingShare(userBalance).toFixed(1)}% of circulating</small></article>
-        <article><span>LIQUIDITY POOLS</span><b>{compact.format(poolBalance)}</b><small>{circulatingShare(poolBalance).toFixed(1)}% of circulating</small></article>
-        <article><span>PROTOCOL / TEAM</span><b>{compact.format(protocolBalance)}</b><small>{circulatingShare(protocolBalance).toFixed(1)}% of circulating</small></article>
+        <article><span>USER / UNCLASSIFIED</span><div className="supply-value-row"><b className="acid">{compact.format(userBalance)}</b><small>{circulatingShare(userBalance).toFixed(1)}% of circulating</small></div></article>
+        <article><span>LIQUIDITY POOLS</span><div className="supply-value-row"><b>{compact.format(poolBalance)}</b><small>{circulatingShare(poolBalance).toFixed(1)}% of circulating</small></div></article>
+        <article><span>PROTOCOL / TEAM</span><div className="supply-value-row"><b>{compact.format(protocolBalance)}</b><small>{circulatingShare(protocolBalance).toFixed(1)}% of circulating</small></div></article>
       </div>
     </section>
 
