@@ -267,6 +267,9 @@ tbody tr:last-child td { border-bottom: 0; }
 .share { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
 .share > span { min-width: 2px; height: 2px; border-radius: 2px; background: var(--cream-soft); opacity: .72; }
 .usd-value { color: var(--cream-soft); }
+.star-heading { color: var(--amber); cursor: help; }
+.star-score { color: var(--cream-soft); font-variant-numeric: tabular-nums; }
+.star-score span { margin-right: 6px; color: var(--amber); font-size: 8px; }
 .new-pill { padding: 4px 6px; border: 1px solid var(--line-strong); border-radius: 7px; color: var(--cream); font-size: 6px; }
 .no-results { padding: 35px; text-align: center; color: var(--muted); font-size: 9px; }
 .pagination { padding: 18px 25px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); color: var(--muted); font-size: 7px; letter-spacing: .11em; }

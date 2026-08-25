@@ -7,6 +7,7 @@ const MINT = "AMUgSjmdFsS8Y3JeL32u7A45Fpt8YF9xKaiwW5uGHdXk";
 const PAIR = "DEGN92EGHuV3gKwzuF7j2G6Dg9UXhKpECw2eN6uuyD9R";
 const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 });
 const precise = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
+const starFormat = new Intl.NumberFormat("en", { maximumFractionDigits: 8 });
 const money = (value: number | null | undefined) => value == null ? "—" : `$${compact.format(value)}`;
 const short = (address: string) => `${address.slice(0, 5)}…${address.slice(-5)}`;
 const signed = (value: number) => `${value > 0 ? "+" : ""}${compact.format(value)}`;
@@ -39,6 +40,7 @@ function HolderRow({ holder, priceUsd }: { holder: Holder; priceUsd: number | nu
     <td><div className="wallet-cell"><div className="wallet-address-line"><a className="address" href={`https://solscan.io/account/${holder.owner}`} target="_blank" rel="noreferrer">{short(holder.owner)} <span>↗</span></a>{holder.protocol && <span className={`protocol-badge ${holder.category}`}>{holder.protocol}</span>}{holder.verified && <span className="verified-source" tabIndex={0}>✓<span className="source-tooltip"><b>VERIFIED SOURCE</b><strong>{holder.sourceName}</strong>{holder.allocationNote && <p>{holder.allocationNote}</p>}{holder.unlockAt && <em>UNLOCKS {unlockDate(holder.unlockAt)}</em>}<a href={holder.sourceUrl || "#"} target="_blank" rel="noreferrer">Open evidence ↗</a></span></span>}</div><span className={`wallet-label ${holder.category}`}>{holder.label}</span>{holder.unlockAt && <span className="unlock-date">UNLOCKS {unlockDate(holder.unlockAt)}</span>}</div></td>
     <td className="number strong">{precise.format(holder.balance)}</td>
     <td className="number usd-value">{priceUsd == null ? "—" : money(holder.balance * priceUsd)}</td>
+    <td className="number star-score">{holder.category === "user" ? <><span aria-hidden>★</span>{starFormat.format(holder.stars || 0)}</> : "—"}</td>
     <td className="number"><div className="share"><span style={{ width: `${Math.min(holder.sharePct * 2, 70)}px` }} />{holder.sharePct.toFixed(2)}%</div></td>
     <td className={`number ${deltaClass}`}>{signed(holder.delta)}</td>
     <td className="number">{holder.status === "new" ? <span className="new-pill">NEW</span> : holder.rankChange ? `${holder.rankChange > 0 ? "↑" : "↓"} ${Math.abs(holder.rankChange)}` : "—"}</td>
@@ -159,7 +161,7 @@ export default function Dashboard() {
         <button className={filter === "controlled" ? "active" : ""} onClick={() => setFilter("controlled")}>TREASURY + VESTING <b>{(categoryCounts.treasury || 0) + (categoryCounts.vesting || 0)}</b></button>
         <button className={filter === "user" ? "active" : ""} onClick={() => setFilter("user")}>USERS <b>{categoryCounts.user || 0}</b></button>
       </div>
-      <div className="table-scroll"><table><thead><tr><th>RANK</th><th>WALLET</th><th className="number">BALANCE</th><th className="number">USD VALUE</th><th className="number">SHARE</th><th className="number">10M CHANGE</th><th className="number">RANK MOVE</th></tr></thead><tbody>{pagedHolders.map((holder) => <HolderRow key={holder.owner} holder={holder} priceUsd={latest.market.priceUsd} />)}</tbody></table></div>
+      <div className="table-scroll"><table><thead><tr><th>RANK</th><th>WALLET</th><th className="number">BALANCE</th><th className="number">USD VALUE</th><th className="number star-heading" title="Each eligible snapshot awards 0.00000001 Stars per CMNS held. Project-controlled wallets and pools are excluded.">★ STARS</th><th className="number">SHARE</th><th className="number">10M CHANGE</th><th className="number">RANK MOVE</th></tr></thead><tbody>{pagedHolders.map((holder) => <HolderRow key={holder.owner} holder={holder} priceUsd={latest.market.priceUsd} />)}</tbody></table></div>
       {!holders.length && <div className="no-results">No wallet matched this filter.</div>}
       {!!holders.length && <div className="pagination"><span>SHOWING {pageStart + 1}–{Math.min(pageStart + PAGE_SIZE, holders.length)} OF {holders.length}</span><div><button onClick={() => setPage(1)} disabled={currentPage === 1}>FIRST</button><button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1}>← PREV</button><b>PAGE {currentPage} / {totalPages}</b><button onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={currentPage === totalPages}>NEXT →</button><button onClick={() => setPage(totalPages)} disabled={currentPage === totalPages}>LAST</button></div></div>}
     </section>

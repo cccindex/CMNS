@@ -7,6 +7,7 @@ export type Holder = {
   delta: number;
   deltaRaw: string;
   rankChange: number;
+  stars: number;
   status: "new" | "up" | "down" | "unchanged";
   category: "pool" | "protocol" | "treasury" | "vesting" | "user";
   label: string;

@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const pct = (raw: bigint, supply: bigint) => supply === 0n ? 0 : Number((raw * 1_000_000n) / supply) / 10_000;
+const STAR_RATE_PER_SNAPSHOT = 0.00000001;
 
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -27,17 +28,20 @@ export async function GET(request: NextRequest) {
       const old = previousByOwner.get(owner);
       const deltaRaw = previous ? amount - BigInt(old?.amountRaw || "0") : 0n;
       const rank = index + 1;
+      const balance = Number(amount) / divisor;
+      const classification = classifyWallet(owner);
       return {
         rank,
         owner,
-        balance: Number(amount) / divisor,
+        balance,
         amountRaw: amount.toString(),
         sharePct: pct(amount, supplyBigInt),
         delta: Number(deltaRaw) / divisor,
         deltaRaw: deltaRaw.toString(),
         rankChange: old ? old.rank - rank : 0,
+        stars: classification.category === "user" ? (old?.stars || 0) + balance * STAR_RATE_PER_SNAPSHOT : 0,
         status: !previous ? "unchanged" : !old ? "new" : deltaRaw > 0n ? "up" : deltaRaw < 0n ? "down" : "unchanged",
-        ...classifyWallet(owner),
+        ...classification,
       };
     });
 
