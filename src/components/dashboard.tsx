@@ -102,17 +102,14 @@ export default function Dashboard() {
     counts[holder.category] = (counts[holder.category] || 0) + 1;
     return counts;
   }, {} as Record<Holder["category"], number>);
-  const concentration = latest.concentration;
   const lockedHolders = latest.holders.filter((holder) => holder.category === "treasury" || holder.category === "vesting");
   const lockedBalance = lockedHolders.reduce((sum, holder) => sum + holder.balance, 0);
-  const treasuryLocked = lockedHolders.filter((holder) => holder.category === "treasury").reduce((sum, holder) => sum + holder.balance, 0);
-  const vestingLocked = lockedBalance - treasuryLocked;
   const poolBalance = latest.holders.filter((holder) => holder.category === "pool").reduce((sum, holder) => sum + holder.balance, 0);
   const protocolBalance = latest.holders.filter((holder) => holder.category === "protocol").reduce((sum, holder) => sum + holder.balance, 0);
   const userBalance = latest.holders.filter((holder) => holder.category === "user").reduce((sum, holder) => sum + holder.balance, 0);
   const circulatingEstimate = Math.max(0, latest.trackedSupply - lockedBalance);
-  const lockedPct = latest.trackedSupply ? lockedBalance / latest.trackedSupply * 100 : 0;
   const circulatingShare = (value: number) => circulatingEstimate ? value / circulatingEstimate * 100 : 0;
+  const topHolderShare = (count: number) => latest.trackedSupply ? latest.holders.slice(0, count).reduce((sum, holder) => sum + holder.balance, 0) / latest.trackedSupply * 100 : 0;
   return <main>
     <header>
       <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>HOLDER INTELLIGENCE</small></a>
@@ -134,7 +131,6 @@ export default function Dashboard() {
         <article><span>USER / UNCLASSIFIED</span><b className="acid">{compact.format(userBalance)}</b><small>{circulatingShare(userBalance).toFixed(1)}% of circulating</small></article>
         <article><span>LIQUIDITY POOLS</span><b>{compact.format(poolBalance)}</b><small>{circulatingShare(poolBalance).toFixed(1)}% of circulating</small></article>
         <article><span>PROTOCOL / TEAM</span><b>{compact.format(protocolBalance)}</b><small>{circulatingShare(protocolBalance).toFixed(1)}% of circulating</small></article>
-        <article><span>CONFIRMED LOCKED</span><b>{compact.format(lockedBalance)}</b><small>{lockedPct.toFixed(1)}% total · {compact.format(treasuryLocked)} treasury + {compact.format(vestingLocked)} vesting</small></article>
       </div>
     </section>
 
@@ -142,13 +138,12 @@ export default function Dashboard() {
       <Metric label="ONCHAIN HOLDERS" value={precise.format(latest.holderCount)} note={`${latest.entrants} entered · ${latest.exits} exited`} tone="acid" />
       <Metric label="TOKEN PRICE" value={latest.market.priceUsd == null ? "—" : `$${latest.market.priceUsd.toFixed(6)}`} note={`${latest.market.priceChange24h != null && latest.market.priceChange24h >= 0 ? "+" : ""}${latest.market.priceChange24h?.toFixed(2) ?? "—"}% over 24h`} tone={latest.market.priceChange24h && latest.market.priceChange24h < 0 ? "red" : ""} />
       <Metric label="MARKET CAP" value={money(latest.market.marketCap)} note={`${money(latest.market.volume24h)} volume / 24h`} />
-      <Metric label="TOP 10 / EX-POOLS" value={concentration ? `${concentration.nonPoolTop10Pct.toFixed(2)}%` : "—"} note={concentration ? `${compact.format(concentration.poolBalance)} CMNS in verified pools` : "Calculating verified pools"} />
     </section>
 
-    {concentration && <section className="concentration-strip">
-      <div><span>CONCENTRATION WITHOUT LIQUIDITY POOLS</span><p>Pool balances are removed from both the ranking and circulating denominator.</p></div>
-      <dl><div><dt>TOP 1</dt><dd>{concentration.nonPoolTop1Pct.toFixed(2)}%</dd></div><div><dt>TOP 5</dt><dd>{concentration.nonPoolTop5Pct.toFixed(2)}%</dd></div><div><dt>TOP 10</dt><dd>{concentration.nonPoolTop10Pct.toFixed(2)}%</dd></div><div><dt>VERIFIED POOLS</dt><dd>{concentration.poolSharePct.toFixed(2)}%</dd></div></dl>
-    </section>}
+    <section className="concentration-strip">
+      <div><span>HOLDER CONCENTRATION</span><p>Share of tracked CMNS held by the largest wallets, including pools and identified project wallets.</p></div>
+      <dl><div><dt>TOP 10 HOLDERS</dt><dd>{topHolderShare(10).toFixed(2)}%</dd></div><div><dt>TOP 25 HOLDERS</dt><dd>{topHolderShare(25).toFixed(2)}%</dd></div></dl>
+    </section>
 
     <section className="insight-grid">
       <article className="panel trend-panel"><div className="panel-head"><div><span className="kicker">HOLDER TREND</span><h2>{latest.holderCount} wallets</h2></div><span className="period">LAST 12H</span></div><Sparkline history={history} /><div className="trend-foot"><span><i className="dot acid-dot"/> Current holders</span><span>{history.length} snapshots saved</span></div></article>
