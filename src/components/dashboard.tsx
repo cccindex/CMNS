@@ -7,7 +7,10 @@ const MINT = "AMUgSjmdFsS8Y3JeL32u7A45Fpt8YF9xKaiwW5uGHdXk";
 const PAIR = "DEGN92EGHuV3gKwzuF7j2G6Dg9UXhKpECw2eN6uuyD9R";
 const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 });
 const precise = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
-const starFormat = new Intl.NumberFormat("en", { maximumFractionDigits: 8 });
+const starFormat = new Intl.NumberFormat("en", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 const money = (value: number | null | undefined) => value == null ? "—" : `$${compact.format(value)}`;
 const short = (address: string) => `${address.slice(0, 5)}…${address.slice(-5)}`;
 const signed = (value: number) => `${value > 0 ? "+" : ""}${compact.format(value)}`;
