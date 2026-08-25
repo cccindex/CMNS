@@ -114,7 +114,7 @@ export default function Dashboard() {
   const topHolderShare = (count: number) => latest.trackedSupply ? latest.holders.slice(0, count).reduce((sum, holder) => sum + holder.balance, 0) / latest.trackedSupply * 100 : 0;
   return <main>
     <header>
-      <a className="brand" href="/"><span className="brand-mark">C</span><span>CMNS</span><small>Holder room</small></a>
+      <a className="brand" href="/"><span className="brand-mark"><img src="/commons-logo.png" alt="" /></span><span>CMNS</span><small>Holder room</small></a>
       <nav>
         <a href="https://app.virtuals.io/virtuals/136564" target="_blank" rel="noreferrer">VIRTUALS ↗</a>
         <a href={`https://dexscreener.com/solana/${PAIR}`} target="_blank" rel="noreferrer">DEX ↗</a>
