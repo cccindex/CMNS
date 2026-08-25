@@ -156,11 +156,11 @@ nav a:hover { border-color: var(--line-strong); color: var(--cream); background:
   box-shadow: var(--raised);
 }
 .supply-overview { display: grid; grid-template-columns: minmax(280px, .85fr) 2fr; overflow: hidden; margin-bottom: 18px; }
-.supply-intro { padding: 27px 28px; border-right: 1px solid var(--line); }
+.supply-intro { padding: 30px; border-right: 1px solid var(--line); }
 .panel h2, .supply-intro h2 { margin: 10px 0 0; font: 400 31px/1.1 var(--serif); letter-spacing: -.025em; }
 .supply-intro p { max-width: 500px; margin: 16px 0 0; color: var(--cream-soft); font-size: 13px; line-height: 1.65; }
 .supply-cards { display: grid; grid-template-columns: repeat(3, 1fr); }
-.supply-cards article { min-width: 0; padding: 30px 28px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid var(--line); }
+.supply-cards article { min-width: 0; padding: 30px; display: flex; flex-direction: column; justify-content: flex-start; border-right: 1px solid var(--line); }
 .supply-cards article:last-child { border-right: 0; }
 .supply-cards span { color: var(--cream-soft); font-size: 11px; letter-spacing: .1em; }
 .supply-value-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-top: 15px; }
@@ -170,11 +170,11 @@ nav a:hover { border-color: var(--line-strong); color: var(--cream); background:
 .negative { color: var(--red); }
 .muted { color: var(--muted); }
 
-.metrics { display: grid; grid-template-columns: repeat(3, 1fr); margin: 18px 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: rgba(13,18,14,.47); box-shadow: var(--pressed); }
-.metric { min-width: 0; padding: 29px 32px; border-right: 1px solid var(--line); }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); align-items: stretch; margin: 18px 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: rgba(13,18,14,.47); box-shadow: var(--pressed); }
+.metric { min-width: 0; padding: 30px; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
 .metric:last-child { border-right: 0; }
 .metric-label { margin-bottom: 16px; color: var(--cream-soft); font-size: 11px; letter-spacing: .1em; }
-.metric-line { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.metric-line { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-top: auto; }
 .metric-value { font: 400 38px/1 var(--serif); letter-spacing: -.03em; }
 .metric-value.red { color: var(--red); }
 .metric-note { color: var(--muted); font-size: 12px; line-height: 1.35; }
@@ -192,14 +192,15 @@ nav a:hover { border-color: var(--line-strong); color: var(--cream); background:
 }
 .concentration-strip > div > span { color: var(--cream); font: 500 13px/1 var(--mono); letter-spacing: .1em; }
 .concentration-strip p { margin: 10px 0 0; color: var(--cream-soft); font-size: 12px; }
-.concentration-strip dl { display: flex; margin: 0; }
-.concentration-strip dl div { min-width: 145px; padding: 3px 24px; border-left: 1px solid var(--line-strong); }
+.concentration-strip dl { display: flex; align-items: stretch; margin: 0; }
+.concentration-strip dl div { min-width: 145px; padding: 3px 24px; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--line-strong); }
 .concentration-strip dt { color: var(--cream-soft); font-size: 10px; letter-spacing: .1em; }
 .concentration-strip dd { margin: 9px 0 0; font: 400 31px/1 var(--serif); }
 
 .insight-grid { display: grid; grid-template-columns: 1.45fr 1fr; gap: 18px; margin: 18px 0; }
 .trend-panel, .movement-panel { min-height: 310px; padding: 25px 27px; }
 .panel-head, .table-title { display: flex; justify-content: space-between; align-items: flex-start; }
+.table-title { align-items: center; }
 .period { padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; color: var(--cream-soft); background: var(--surface-low); box-shadow: var(--pressed); font-size: 9px; letter-spacing: .1em; }
 .sparkline { width: 100%; height: 180px; margin-top: 5px; overflow: visible; }
 .empty-chart { height: 180px; display: grid; place-items: center; color: var(--muted); font-size: 9px; }
@@ -236,7 +237,7 @@ nav a:hover { border-color: var(--line-strong); color: var(--cream); background:
 .table-scroll { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { padding: 15px 25px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--cream-soft); background: rgba(13,18,14,.4); font-size: 10px; font-weight: 500; letter-spacing: .08em; text-align: left; }
-td { padding: 18px 25px; border-bottom: 1px solid rgba(243,238,221,.09); }
+td { padding: 18px 25px; vertical-align: middle; border-bottom: 1px solid rgba(243,238,221,.09); }
 tbody tr:hover { background: rgba(243,238,221,.025); }
 tbody tr:last-child td { border-bottom: 0; }
 .number { text-align: right; white-space: nowrap; }
