@@ -115,7 +115,11 @@ export default function Dashboard() {
   const userBalance = latest.holders.filter((holder) => holder.category === "user").reduce((sum, holder) => sum + holder.balance, 0);
   const circulatingEstimate = Math.max(0, latest.trackedSupply - lockedBalance);
   const circulatingShare = (value: number) => circulatingEstimate ? value / circulatingEstimate * 100 : 0;
-  const topHolderShare = (count: number) => latest.trackedSupply ? latest.holders.slice(0, count).reduce((sum, holder) => sum + holder.balance, 0) / latest.trackedSupply * 100 : 0;
+  const ordinaryHolders = latest.holders.filter((holder) => holder.category === "user");
+  const ordinarySupply = ordinaryHolders.reduce((sum, holder) => sum + holder.balance, 0);
+  const topHolderShare = (count: number) => ordinarySupply
+    ? ordinaryHolders.slice(0, count).reduce((sum, holder) => sum + holder.balance, 0) / ordinarySupply * 100
+    : 0;
   return <main>
     <header>
       <a className="brand" href="/"><span className="brand-mark"><img src="/commons-logo.png" alt="" /></span><span>CMNS</span><small>Holder room</small></a>
@@ -146,7 +150,7 @@ export default function Dashboard() {
     </section>
 
     <section className="concentration-strip">
-      <div><span>HOLDER CONCENTRATION</span><p>Share of tracked CMNS held by the largest wallets, including pools and identified project wallets.</p></div>
+      <div><span>HOLDER CONCENTRATION</span><p>Share of ordinary user-held CMNS owned by the largest unlabelled wallets. Pools, team, protocol, treasury and vesting wallets are excluded.</p></div>
       <dl><div><dt>TOP 10 HOLDERS</dt><dd>{topHolderShare(10).toFixed(2)}%</dd></div><div><dt>TOP 25 HOLDERS</dt><dd>{topHolderShare(25).toFixed(2)}%</dd></div></dl>
     </section>
 
