@@ -20,6 +20,8 @@ async function readJson<T>(pathname: string): Promise<T | null> {
 
 export const readCurrent = () => readJson<Snapshot>(CURRENT_PATH);
 export const readHistory = () => readJson<SnapshotSummary[]>(HISTORY_PATH);
+export const readSnapshot = (capturedAt: string) =>
+  readJson<Snapshot>(`snapshots/${capturedAt.replace(/[:.]/g, "-")}.json`);
 
 export async function saveSnapshot(snapshot: Snapshot) {
   const token = process.env.BLOB_READ_WRITE_TOKEN;

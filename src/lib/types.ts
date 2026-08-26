@@ -65,4 +65,12 @@ export type DashboardPayload = {
   ready: boolean;
   latest?: Snapshot;
   history?: SnapshotSummary[];
+  movement12h?: {
+    entrants: number;
+    exits: number;
+    increased: number;
+    decreased: number;
+    transferred: number;
+    comparedAt: string;
+  };
 };

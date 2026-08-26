@@ -103,6 +103,7 @@ export default function Dashboard() {
 
   const ageMinutes = Math.max(0, Math.floor((Date.now() - new Date(latest.capturedAt).getTime()) / 60_000));
   const history = data.history || [];
+  const movement = data.movement12h;
   const categoryCounts = latest.holders.reduce((counts, holder) => {
     counts[holder.category] = (counts[holder.category] || 0) + 1;
     return counts;
@@ -151,7 +152,7 @@ export default function Dashboard() {
 
     <section className="insight-grid">
       <article className="panel trend-panel"><div className="panel-head"><div><span className="kicker">HOLDER TREND</span><h2>{latest.holderCount} wallets</h2></div><span className="period">LAST 12H</span></div><Sparkline history={history} /><div className="trend-foot"><span><i className="dot acid-dot"/> Current holders</span><span>{history.length} snapshots saved</span></div></article>
-      <article className="panel movement-panel"><div className="panel-head"><div><span className="kicker">SINCE LAST SNAPSHOT</span><h2>Wallet movement</h2></div><span className="period">10 MIN</span></div><div className="movement-stats"><div><b className="positive">+{latest.entrants}</b><span>NEW WALLETS</span></div><div><b className="positive">{latest.movers.increased}</b><span>ACCUMULATED</span></div><div><b className="negative">{latest.movers.decreased}</b><span>REDUCED / EXITED</span></div><div><b>{compact.format(latest.movers.transferred)}</b><span>CMNS MOVED</span></div></div></article>
+      <article className="panel movement-panel"><div className="panel-head"><div><span className="kicker">CHANGES OVER LAST 12 HOURS</span><h2>Wallet movement</h2></div><span className="period">LAST 12H</span></div><div className="movement-stats"><div><b className="positive">+{movement?.entrants ?? 0}</b><span>NEW WALLETS</span></div><div><b className="positive">{movement?.increased ?? 0}</b><span>ACCUMULATED</span></div><div><b className="negative">{movement?.decreased ?? 0}</b><span>REDUCED / EXITED</span></div><div><b>{compact.format(movement?.transferred ?? 0)}</b><span>CMNS MOVED</span></div></div></article>
     </section>
 
     <section className="panel table-panel">
